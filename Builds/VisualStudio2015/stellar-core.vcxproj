@@ -564,6 +564,9 @@
     <ProjectReference Include="libsoci\libsoci.vcxproj">
       <Project>{bbd512eb-db2a-4fa1-bdb8-3ba3d2fcf51b}</Project>
     </ProjectReference>
+    <ProjectReference Include="libsoci_odbc\libsoci_odbc.vcxproj">
+      <Project>{11a50419-08ca-4aad-b6a3-76baa0d5ba3e}</Project>
+    </ProjectReference>
     <ProjectReference Include="libsoci_postgresql\libsoci_postgresql.vcxproj">
       <Project>{af73d670-3d56-4949-bec5-b8e5f7bca2e5}</Project>
       <Private>false</Private>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22310.1
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stellar-core", "stellar-core.vcxproj", "{916B91AB-A300-422C-B9C2-D683924DC109}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libsoci_postgresql", "libsoci_postgresql\libsoci_postgresql.vcxproj", "{AF73D670-3D56-4949-BEC5-B8E5F7BCA2E5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmedida", "libmedida\libmedida.vcxproj", "{274A9F25-F6AE-4484-B5D1-5812C1B7A48D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libsoci_odbc", "libsoci_odbc\libsoci_odbc.vcxproj", "{11A50419-08CA-4AAD-B6A3-76BAA0D5BA3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{274A9F25-F6AE-4484-B5D1-5812C1B7A48D}.Debug|x64.Build.0 = Debug|x64
 		{274A9F25-F6AE-4484-B5D1-5812C1B7A48D}.Release|x64.ActiveCfg = Release|x64
 		{274A9F25-F6AE-4484-B5D1-5812C1B7A48D}.Release|x64.Build.0 = Release|x64
+		{11A50419-08CA-4AAD-B6A3-76BAA0D5BA3E}.Debug|x64.ActiveCfg = Debug|x64
+		{11A50419-08CA-4AAD-B6A3-76BAA0D5BA3E}.Debug|x64.Build.0 = Debug|x64
+		{11A50419-08CA-4AAD-B6A3-76BAA0D5BA3E}.Release|x64.ActiveCfg = Release|x64
+		{11A50419-08CA-4AAD-B6A3-76BAA0D5BA3E}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

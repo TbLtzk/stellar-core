@@ -39,6 +39,9 @@ extern "C" void register_factory_sqlite3();
 #ifdef USE_POSTGRES
 extern "C" void register_factory_postgresql();
 #endif
+#ifdef USE_ODBC
+extern "C" void register_factory_odbc();
+#endif
 
 // NOTE: soci will just crash and not throw
 //  if you misname a column in a query. yay!
@@ -56,8 +59,16 @@ static unsigned long const SCHEMA_VERSION = 3;
 static void
 setSerializable(soci::session& sess)
 {
-    sess << "SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL "
-            "SERIALIZABLE";
+	if (sess.get_backend_name() == "odbc")
+	{
+		sess << "SET TRANSACTION ISOLATION LEVEL "
+				"SERIALIZABLE";
+	}
+	else
+	{
+		sess << "SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL "
+				"SERIALIZABLE";
+	}
 }
 
 void
@@ -69,7 +80,10 @@ Database::registerDrivers()
 #ifdef USE_POSTGRES
         register_factory_postgresql();
 #endif
-        gDriversRegistered = true;
+#ifdef USE_ODBC
+		register_factory_odbc();
+#endif
+		gDriversRegistered = true;
     }
 }
 
@@ -232,7 +246,7 @@ Database::setCurrentTransactionReadOnly()
 bool
 Database::isSqlite() const
 {
-    return mApp.getConfig().DATABASE.find("sqlite3:") != std::string::npos;
+    return mSession.get_backend_name() == "sqlite3";
 }
 
 bool

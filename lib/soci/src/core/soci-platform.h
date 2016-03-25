@@ -8,6 +8,9 @@
 #ifndef SOCI_PLATFORM_H_INCLUDED
 #define SOCI_PLATFORM_H_INCLUDED
 
+#include <memory>
+#include "soci-config.h" // for SOCI_HAVE_CXX_C11
+
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define LL_FMT_FLAGS "I64"
 #else
@@ -55,5 +58,48 @@ namespace std {
 # error "Visual C++ versions prior 1300 don't support _strtoi64 and _strtoui64"
 #endif // _MSC_VER >= 1300
 #endif // _MSC_VER
+
+// C++11 features are always available in MSVS as it has no separate C++98
+// mode, we just need to check for the minimal compiler version supporting them
+// (see https://msdn.microsoft.com/en-us/library/hh567368.aspx).
+
+namespace soci
+{
+
+	namespace cxx_details
+	{
+
+#if defined(SOCI_HAVE_CXX_C11) || (defined(_MSC_VER) && _MSC_VER >= 1800)
+		template <typename T>
+		using auto_ptr = std::unique_ptr<T>;
+#else // std::unique_ptr<> not available
+		using std::auto_ptr;
+#endif
+
+	} // namespace cxx_details
+
+} // namespace soci
+
+#if defined(SOCI_HAVE_CXX_C11) || (defined(_MSC_VER) && _MSC_VER >= 1800)
+#define SOCI_NOT_ASSIGNABLE(classname) \
+        classname& operator=(const classname&) = delete;
+#define SOCI_NOT_COPYABLE(classname) \
+        classname(const classname&) = delete; \
+        SOCI_NOT_ASSIGNABLE(classname)
+#else // no C++11 deleted members support
+#define SOCI_NOT_ASSIGNABLE(classname) \
+        classname& operator=(const classname&);
+#define SOCI_NOT_COPYABLE(classname) \
+        classname(const classname&); \
+        SOCI_NOT_ASSIGNABLE(classname)
+#endif // C++11 deleted members available
+
+#define SOCI_UNUSED(x) (void)x;
+
+#if defined(SOCI_HAVE_CXX_C11) || (defined(_MSC_VER) && _MSC_VER >= 1900)
+#define SOCI_NOEXCEPT_FALSE noexcept(false)
+#else
+#define SOCI_NOEXCEPT_FALSE
+#endif
 
 #endif // SOCI_PLATFORM_H_INCLUDED
