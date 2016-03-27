@@ -73,5 +73,6 @@ class PeerRecord
     std::chrono::seconds computeBackoff(VirtualClock& clock);
     static void ipToXdr(std::string ip, xdr::opaque_array<4U>& ret);
     static const char* kSQLCreateStatement;
+	static const char* kSQLCreateStatementOdbc;
 };
 }

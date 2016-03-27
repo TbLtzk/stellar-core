@@ -1911,9 +1911,9 @@ Herder::copySCPHistoryToStream(Database& db, soci::session& sess,
 void
 Herder::dropAll(Database& db)
 {
-    db.getSession() << "DROP TABLE IF EXISTS scphistory";
+    db.dropTableIfExists("scphistory");
 
-    db.getSession() << "DROP TABLE IF EXISTS scpquorums";
+    db.dropTableIfExists("scpquorums");
 
     db.getSession() << "CREATE TABLE scphistory ("
                        "nodeid      CHARACTER(56) NOT NULL,"

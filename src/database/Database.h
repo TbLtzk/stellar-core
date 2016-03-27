@@ -159,8 +159,13 @@ class Database : NonMovableOrCopyable
     // only as long as the current SQL transaction.
     void setCurrentTransactionReadOnly();
 
+	void dropTableIfExists(std::string const& tableName);
+
     // Return true if the Database target is SQLite, otherwise false.
     bool isSqlite() const;
+
+	// Return true if the Database target is Odbc, otherwise false.
+	bool isOdbc() const;
 
     // Return true if a connection pool is available for worker threads
     // to read from the database through, otherwise false.

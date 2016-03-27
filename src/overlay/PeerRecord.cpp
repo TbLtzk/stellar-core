@@ -162,11 +162,19 @@ PeerRecord::loadPeerRecords(Database& db, uint32_t max,
         PeerRecord pr;
         tm nextAttempt;
         uint32_t lport;
-        auto prep = db.getPreparedStatement(
-            "SELECT ip, port, nextattempt, numfailures "
-            "FROM peers "
-            "WHERE nextattempt <= :nextattempt "
-            "ORDER BY nextattempt ASC, numfailures ASC limit :max ");
+
+		std::string query = "SELECT ip, port, nextattempt, numfailures "
+					"FROM peers "
+					"WHERE nextattempt <= :nextattempt "
+					"ORDER BY nextattempt ASC, numfailures ASC ";
+
+		if (db.isOdbc())
+			query += "OFFSET 0 ROWS FETCH FIRST :max ROWS ONLY ";
+		else
+			query += " limit :max ";
+
+		auto prep = db.getPreparedStatement(query);
+
         auto& st = prep.statement();
         st.exchange(use(nextAttemptMax));
         st.exchange(use(max));
@@ -344,8 +352,11 @@ PeerRecord::toString()
 void
 PeerRecord::dropAll(Database& db)
 {
-    db.getSession() << "DROP TABLE IF EXISTS peers;";
-    db.getSession() << kSQLCreateStatement;
+    db.dropTableIfExists("peers");
+	if(db.isOdbc())
+		db.getSession() << kSQLCreateStatementOdbc;
+	else
+		db.getSession() << kSQLCreateStatement;
 }
 
 const char* PeerRecord::kSQLCreateStatement =
@@ -353,6 +364,15 @@ const char* PeerRecord::kSQLCreateStatement =
     "ip            VARCHAR(15) NOT NULL,"
     "port          INT DEFAULT 0 CHECK (port > 0 AND port <= 65535) NOT NULL,"
     "nextattempt   TIMESTAMP NOT NULL,"
+    "numfailures   INT DEFAULT 0 CHECK (numfailures >= 0) NOT NULL,"
+    "PRIMARY KEY (ip, port)"
+    ");";
+
+const char* PeerRecord::kSQLCreateStatementOdbc =
+    "CREATE TABLE peers ("
+    "ip            VARCHAR(15) NOT NULL,"
+    "port          INT DEFAULT 0 CHECK (port > 0 AND port <= 65535) NOT NULL,"
+    "nextattempt   DATETIME NOT NULL,"
     "numfailures   INT DEFAULT 0 CHECK (numfailures >= 0) NOT NULL,"
     "PRIMARY KEY (ip, port)"
     ");";

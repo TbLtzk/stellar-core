@@ -228,7 +228,7 @@ LedgerHeaderFrame::deleteOldEntries(Database& db, uint32_t ledgerSeq)
 void
 LedgerHeaderFrame::dropAll(Database& db)
 {
-    db.getSession() << "DROP TABLE IF EXISTS ledgerheaders;";
+    db.dropTableIfExists("ledgerheaders");
 
     db.getSession() << "CREATE TABLE ledgerheaders ("
                        "ledgerhash      CHARACTER(64) PRIMARY KEY,"

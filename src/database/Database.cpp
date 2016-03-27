@@ -34,6 +34,8 @@
 #include <sstream>
 #include <thread>
 
+#define USE_ODBC
+
 extern "C" void register_factory_sqlite3();
 
 #ifdef USE_POSTGRES
@@ -234,7 +236,7 @@ Database::getUpdateTimer(std::string const& entityName)
 void
 Database::setCurrentTransactionReadOnly()
 {
-    if (!isSqlite())
+    if (!isSqlite() && !isOdbc())
     {
         auto prep = getPreparedStatement("SET TRANSACTION READ ONLY");
         auto& st = prep.statement();
@@ -243,10 +245,27 @@ Database::setCurrentTransactionReadOnly()
     }
 }
 
+void Database::dropTableIfExists(std::string const & tableName)
+{
+	if (isOdbc())
+	{
+		mSession << "IF OBJECT_ID('" << tableName << "') IS NOT NULL DROP TABLE " << tableName << ";";
+	}
+	else 
+	{
+		mSession << "DROP TABLE IF EXISTS " << tableName << ";";
+	}
+}
+
 bool
 Database::isSqlite() const
 {
     return mSession.get_backend_name() == "sqlite3";
+}
+
+bool Database::isOdbc() const
+{
+	return mSession.get_backend_name() == "odbc";
 }
 
 bool

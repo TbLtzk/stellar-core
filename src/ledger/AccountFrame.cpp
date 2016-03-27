@@ -326,8 +326,8 @@ AccountFrame::exists(Database& db, LedgerKey const& key)
     {
         auto timer = db.getSelectTimer("account-exists");
         auto prep =
-            db.getPreparedStatement("SELECT EXISTS (SELECT NULL FROM accounts "
-                                    "WHERE accountid=:v1)");
+            db.getPreparedStatement("SELECT CASE WHEN EXISTS (SELECT NULL FROM accounts "
+                                    "WHERE accountid=:v1) THEN 1 ELSE 0 END");
         auto& st = prep.statement();
         st.exchange(use(actIDStrKey));
         st.exchange(into(exists));
@@ -603,13 +603,19 @@ AccountFrame::processForInflation(
     InflationVotes v;
     std::string inflationDest;
 
+	std::string query = "SELECT"
+		" sum(balance) AS votes, inflationdest FROM accounts WHERE"
+		" inflationdest IS NOT NULL"
+		" AND balance >= 1000000000 GROUP BY inflationdest"
+		" ORDER BY votes DESC, inflationdest DESC ";
+
+	if (db.isOdbc())
+		query += "OFFSET 0 ROWS FETCH FIRST :lim ROWS ONLY;";
+	else
+		query += "LIMIT :lim;";
+
     soci::statement st =
-        (session.prepare
-             << "SELECT"
-                " sum(balance) AS votes, inflationdest FROM accounts WHERE"
-                " inflationdest IS NOT NULL"
-                " AND balance >= 1000000000 GROUP BY inflationdest"
-                " ORDER BY votes DESC, inflationdest DESC LIMIT :lim",
+        (session.prepare <<  query,
          into(v.mVotes), into(inflationDest), use(maxWinners));
 
     st.execute(true);
@@ -679,8 +685,8 @@ AccountFrame::checkDB(Database& db)
 void
 AccountFrame::dropAll(Database& db)
 {
-    db.getSession() << "DROP TABLE IF EXISTS accounts;";
-    db.getSession() << "DROP TABLE IF EXISTS signers;";
+	db.dropTableIfExists("accounts");
+	db.dropTableIfExists("signers");
 
     db.getSession() << kSQLCreateStatement1;
     db.getSession() << kSQLCreateStatement2;

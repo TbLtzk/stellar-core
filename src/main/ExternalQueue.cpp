@@ -17,20 +17,19 @@ namespace stellar
 using namespace std;
 
 string ExternalQueue::kSQLCreateStatement =
-    "CREATE TABLE IF NOT EXISTS pubsub ("
+    "CREATE TABLE pubsub ("
     "resid       CHARACTER(32) PRIMARY KEY,"
     "lastread    INTEGER"
     "); ";
 
 ExternalQueue::ExternalQueue(Application& app) : mApp(app)
 {
-    mApp.getDatabase().getSession() << kSQLCreateStatement;
 }
 
 void
 ExternalQueue::dropAll(Database& db)
 {
-    db.getSession() << "DROP TABLE IF EXISTS pubsub;";
+    db.dropTableIfExists("pubsub");
 
     soci::statement st = db.getSession().prepare << kSQLCreateStatement;
     st.execute(true);

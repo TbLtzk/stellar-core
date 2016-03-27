@@ -324,7 +324,10 @@ OfferFrame::loadBestOffers(size_t numOffers, size_t offset,
 
     // price is an approximation of the actual n/d (truncated math, 15 digits)
     // ordering by offerid gives precendence to older offers for fairness
-    sql += " ORDER BY price, offerid LIMIT :n OFFSET :o";
+	if(db.isOdbc())
+		sql += " ORDER BY price, offerid OFFSET :o ROWS FETCH NEXT :n ROWS ONLY";
+	else
+		sql += " ORDER BY price, offerid LIMIT :n OFFSET :o";
 
     auto prep = db.getPreparedStatement(sql);
     auto& st = prep.statement();
@@ -396,8 +399,8 @@ OfferFrame::exists(Database& db, LedgerKey const& key)
     int exists = 0;
     auto timer = db.getSelectTimer("offer-exists");
     auto prep =
-        db.getPreparedStatement("SELECT EXISTS (SELECT NULL FROM offers "
-                                "WHERE sellerid=:id AND offerid=:s)");
+        db.getPreparedStatement("SELECT CASE WHEN EXISTS (SELECT NULL FROM offers "
+                                "WHERE sellerid=:id AND offerid=:s) THEN 1 ELSE 0 END");
     auto& st = prep.statement();
     st.exchange(use(actIDStrKey));
     st.exchange(use(key.offer().offerID));
@@ -563,7 +566,7 @@ OfferFrame::storeUpdateHelper(LedgerDelta& delta, Database& db, bool insert)
 void
 OfferFrame::dropAll(Database& db)
 {
-    db.getSession() << "DROP TABLE IF EXISTS offers;";
+    db.dropTableIfExists("offers");
     db.getSession() << kSQLCreateStatement1;
     db.getSession() << kSQLCreateStatement2;
     db.getSession() << kSQLCreateStatement3;

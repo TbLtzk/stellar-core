@@ -39,7 +39,7 @@ namespace stellar
 
 using namespace std;
 
-static string kSQLCreateStatement = "CREATE TABLE IF NOT EXISTS publishqueue ("
+static string kSQLCreateStatement = "CREATE TABLE publishqueue ("
                                     "ledger   INTEGER PRIMARY KEY,"
                                     "state    TEXT"
                                     "); ";
@@ -47,7 +47,7 @@ static string kSQLCreateStatement = "CREATE TABLE IF NOT EXISTS publishqueue ("
 void
 HistoryManager::dropAll(Database& db)
 {
-    db.getSession() << "DROP TABLE IF EXISTS publishqueue;";
+    db.dropTableIfExists("publishqueue");
     soci::statement st = db.getSession().prepare << kSQLCreateStatement;
     st.execute(true);
 }
@@ -530,10 +530,15 @@ size_t
 HistoryManagerImpl::publishQueuedHistory()
 {
     std::string state;
+	std::string query = "SELECT state FROM publishqueue "
+						"ORDER BY ledger ASC ";
 
-    auto prep = mApp.getDatabase().getPreparedStatement(
-        "SELECT state FROM publishqueue"
-        " ORDER BY ledger ASC LIMIT 1;");
+	if (mApp.getDatabase().isOdbc())
+		query += "OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY;";
+	else
+		query += "LIMIT 1;";
+
+	auto prep = mApp.getDatabase().getPreparedStatement(query);
     auto& st = prep.statement();
     soci::indicator stateIndicator;
     st.exchange(soci::into(state, stateIndicator));

@@ -17,7 +17,7 @@ string PersistentState::mapping[kLastEntry] = {
     "lastscpdata", "databaseschema"};
 
 string PersistentState::kSQLCreateStatement =
-    "CREATE TABLE IF NOT EXISTS storestate ("
+    "CREATE TABLE storestate ("
     "statename   CHARACTER(32) PRIMARY KEY,"
     "state       TEXT"
     "); ";
@@ -29,7 +29,7 @@ PersistentState::PersistentState(Application& app) : mApp(app)
 void
 PersistentState::dropAll(Database& db)
 {
-    db.getSession() << "DROP TABLE IF EXISTS storestate;";
+    db.dropTableIfExists("storestate");
 
     soci::statement st = db.getSession().prepare << kSQLCreateStatement;
     st.execute(true);

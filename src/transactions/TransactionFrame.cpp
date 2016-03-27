@@ -767,9 +767,9 @@ TransactionFrame::copyTransactionsToStream(Hash const& networkID, Database& db,
 void
 TransactionFrame::dropAll(Database& db)
 {
-    db.getSession() << "DROP TABLE IF EXISTS txhistory";
+    db.dropTableIfExists("txhistory");
 
-    db.getSession() << "DROP TABLE IF EXISTS txfeehistory";
+    db.dropTableIfExists("txfeehistory");
 
     db.getSession() << "CREATE TABLE txhistory ("
                        "txid        CHARACTER(64) NOT NULL,"

@@ -181,8 +181,8 @@ TrustFrame::exists(Database& db, LedgerKey const& key)
     int exists = 0;
     auto timer = db.getSelectTimer("trust-exists");
     auto prep = db.getPreparedStatement(
-        "SELECT EXISTS (SELECT NULL FROM trustlines "
-        "WHERE accountid=:v1 AND issuer=:v2 AND assetcode=:v3)");
+        "SELECT CASE WHEN EXISTS (SELECT NULL FROM trustlines "
+        "WHERE accountid=:v1 AND issuer=:v2 AND assetcode=:v3) THEN 1 ELSE 0 END");
     auto& st = prep.statement();
     st.exchange(use(actIDStrKey));
     st.exchange(use(issuerStrKey));
@@ -514,7 +514,7 @@ TrustFrame::loadAllLines(Database& db)
 void
 TrustFrame::dropAll(Database& db)
 {
-    db.getSession() << "DROP TABLE IF EXISTS trustlines;";
+    db.dropTableIfExists("trustlines");
     db.getSession() << kSQLCreateStatement1;
 }
 }
